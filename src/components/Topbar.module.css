@@ -1,0 +1,68 @@
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 52px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.left { display: flex; align-items: center; gap: 16px; }
+
+.logo { display: flex; align-items: center; gap: 8px; }
+.logoIcon {
+  width: 26px; height: 26px;
+  background: var(--accent);
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+.logoText { font-size: 15px; font-weight: 600; color: var(--text-1); letter-spacing: -0.3px; }
+.logoBadge {
+  font-size: 10px; font-weight: 500;
+  padding: 2px 7px; border-radius: 99px;
+  background: var(--accent-dim); color: #818CF8;
+  border: 1px solid rgba(99,102,241,0.25);
+}
+
+.breadcrumb { display: flex; align-items: center; gap: 4px; }
+.crumbBtn {
+  background: none; border: none; font-size: 13px;
+  color: var(--text-3); padding: 2px 4px; border-radius: 4px;
+  transition: color 0.15s;
+}
+.crumbBtn:hover { color: var(--text-2); }
+.crumbSep { color: var(--text-3); }
+.crumbActive { font-size: 13px; color: var(--text-1); font-weight: 500; }
+
+.right { display: flex; align-items: center; gap: 10px; }
+
+.modelBadge,
+.teamBadge {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--text-2);
+  padding: 5px 10px; border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+}
+.modelDot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+}
+
+.assetCount {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 12px; font-weight: 500; color: #818CF8;
+  padding: 5px 10px; border-radius: var(--radius-md);
+  border: 1px solid rgba(99,102,241,0.3);
+  background: var(--accent-dim);
+  transition: all 0.15s;
+}
+.assetCount:hover { background: rgba(99,102,241,0.2); border-color: rgba(99,102,241,0.5); }
