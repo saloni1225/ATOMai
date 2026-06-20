@@ -27,6 +27,19 @@
 }
 .downloadBtn:hover { color: var(--text-1); border-color: var(--border-mid); }
 
+.futureBtn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: var(--radius-md);
+  border: 1px solid rgba(34,211,238,0.42);
+  background: linear-gradient(135deg, rgba(34,211,238,0.15), rgba(139,92,246,0.12));
+  color: #67E8F9; font-size: 12px; font-weight: 700; transition: all 0.15s;
+}
+.futureBtn:hover {
+  color: #ECFEFF;
+  border-color: rgba(34,211,238,0.7);
+  box-shadow: 0 0 22px rgba(34,211,238,0.16);
+}
+
 .body { display: flex; flex: 1; min-height: 0; overflow: hidden; }
 
 .sidebar {

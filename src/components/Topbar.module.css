@@ -66,3 +66,18 @@
   transition: all 0.15s;
 }
 .assetCount:hover { background: rgba(99,102,241,0.2); border-color: rgba(99,102,241,0.5); }
+
+.futureBtn {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 12px; font-weight: 600; color: #67E8F9;
+  padding: 5px 10px; border-radius: var(--radius-md);
+  border: 1px solid rgba(34,211,238,0.34);
+  background: linear-gradient(135deg, rgba(34,211,238,0.15), rgba(139,92,246,0.12));
+  transition: all 0.15s;
+  box-shadow: 0 0 18px rgba(34,211,238,0.08);
+}
+.futureBtn:hover {
+  color: #ECFEFF;
+  border-color: rgba(34,211,238,0.58);
+  box-shadow: 0 0 22px rgba(34,211,238,0.18);
+}

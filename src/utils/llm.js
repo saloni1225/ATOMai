@@ -1,6 +1,6 @@
-const NEBIUS_API_KEY = import.meta.env.VITE_NEBIUS_API_KEY || 'YOUR_NEBIUS_API_KEY_HERE';
+const NEBIUS_API_KEY = import.meta.env.VITE_NEBIUS_API_KEY;
 const NEBIUS_BASE    = 'https://api.studio.nebius.com/v1';
-const MODEL          = import.meta.env.VITE_NEBIUS_MODEL || 'google/gemma-3-27b-it';
+const MODEL          = import.meta.env.VITE_NEBIUS_MODEL;
 
 export async function callLLMDirect(prompt) {
   const res = await fetch(`${NEBIUS_BASE}/chat/completions`, {
@@ -11,7 +11,7 @@ export async function callLLMDirect(prompt) {
     },
     body: JSON.stringify({
       model: MODEL,
-      max_tokens: 1400,
+      max_tokens: 2000,
       messages: [{ role: 'user', content: prompt }],
     }),
   });

@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Copy, Edit3, ArrowLeft, Check, Download, Filter, Send, ShieldCheck, UploadCloud, AlertTriangle, GitBranch } from 'lucide-react';
+import { Copy, Edit3, ArrowLeft, Check, Download, Filter, Send, ShieldCheck, UploadCloud, AlertTriangle, GitBranch, BrainCircuit } from 'lucide-react';
 import { useStore, STATUS_META } from '../store/useStore';
 import styles from './Results.module.css';
 
 export default function Results() {
   const {
-    assets, setView, setActiveAsset, content, collaborators,
+    assets, setView, setActiveAsset, content, collaborators, startSimulation,
     submitForReview, approveAsset, requestChanges, publishAsset, assignAsset, assetMetrics,
   } = useStore();
   const [copied, setCopied] = useState(null);
@@ -51,6 +51,9 @@ export default function Results() {
           </div>
         </div>
         <div className={styles.headerActions}>
+          <button className={styles.futureBtn} onClick={() => startSimulation(assets[0]?.text || content)}>
+            <BrainCircuit size={13} /> Simulate Future
+          </button>
           <button className={styles.downloadBtn} onClick={downloadAll}>
             <Download size={13} /> Download all
           </button>

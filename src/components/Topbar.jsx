@@ -1,9 +1,9 @@
-import { Zap, Layers, ChevronRight, Users } from 'lucide-react';
+import { Zap, Layers, ChevronRight, Users, BrainCircuit } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import styles from './Topbar.module.css';
 
 export default function Topbar() {
-  const { assets, view, setView, collaborators, modelName } = useStore();
+  const { assets, view, setView, collaborators, modelName, simulation, startSimulation, content } = useStore();
 
   return (
     <header className={styles.topbar}>
@@ -25,6 +25,7 @@ export default function Topbar() {
                 <span className={styles.crumbActive}>Asset editor</span>
               </>
             )}
+            {view === 'simulator' && <span className={styles.crumbActive}>Future simulator</span>}
           </nav>
         )}
       </div>
@@ -41,6 +42,12 @@ export default function Topbar() {
           <button className={styles.assetCount} onClick={() => setView('results')}>
             <Layers size={13} />
             {assets.length} asset{assets.length !== 1 ? 's' : ''}
+          </button>
+        )}
+        {(content.trim() || simulation) && (
+          <button className={styles.futureBtn} onClick={() => simulation ? setView('simulator') : startSimulation()}>
+            <BrainCircuit size={13} />
+            Future
           </button>
         )}
       </div>

@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Expand, AlignLeft, Wand2, Users, Atom, Sparkles, Copy, RotateCcw, ChevronDown, ShieldCheck, Clock3 } from 'lucide-react';
+import { Expand, AlignLeft, Wand2, Users, Atom, Sparkles, Copy, RotateCcw, ChevronDown, ShieldCheck, Clock3, BrainCircuit } from 'lucide-react';
 import { useStore, STATUS_META } from '../store/useStore';
 import AtomizeModal from './AtomizeModal';
 import ToneModal from './ToneModal';
@@ -22,7 +22,7 @@ Guest: They do! They even have a flap of skin under their arms. It is like a lit
 Host: A built-in pocket! I love that. Well, that is all the time we have today. Thank you, Lily.`;
 
 export default function Editor() {
-  const { content, setContent, runQuickAction, runGenerate, isLoading, setAtomizeOpen, assets, setView, isMock, collaborators, campaignName, dueWindow, assetMetrics } = useStore();
+  const { content, setContent, runQuickAction, runGenerate, isLoading, setAtomizeOpen, assets, setView, isMock, collaborators, campaignName, dueWindow, assetMetrics, startSimulation } = useStore();
   const [toneOpen, setToneOpen] = useState(false);
   const [tonePreview, setTonePreview] = useState(null);
   const [aiPrompt, setAiPrompt] = useState('');
@@ -68,6 +68,9 @@ export default function Editor() {
         <button className={styles.atomizeBtn} onClick={() => setAtomizeOpen(true)} disabled={isLoading || !content.trim()}>
           <Atom size={13} /> Atomize Content
           {content.trim() && <span className={styles.atomizePulse} />}
+        </button>
+        <button className={styles.futureBtn} onClick={() => startSimulation(content)} disabled={isLoading || !content.trim()}>
+          <BrainCircuit size={13} /> Simulate Future
         </button>
         {assets.length > 0 && (
           <button className={styles.viewResultsBtn} onClick={() => setView('results')}>

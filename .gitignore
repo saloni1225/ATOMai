@@ -13,5 +13,6 @@ pnpm-debug.log*
 Thumbs.db
 
 .vite/
+.npm-cache/
 .idea/
 .vscode/

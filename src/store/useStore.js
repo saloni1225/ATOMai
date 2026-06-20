@@ -156,6 +156,243 @@ function reviewerFor(formatId, index = 0) {
   return index % 2 === 0 ? 'dev' : 'maya';
 }
 
+const clamp = (value, min = 1, max = 99) => Math.max(min, Math.min(max, Math.round(value)));
+const compactNumber = (value) => value >= 1000 ? `${(value / 1000).toFixed(value >= 100000 ? 0 : 1)}K` : `${value}`;
+
+function signalFromText(text = '', seed = 0) {
+  const words = text.trim().split(/\s+/).filter(Boolean);
+  const lower = text.toLowerCase();
+  const hooks = ['why', 'secret', 'future', 'new', 'stop', 'mistake', 'how', 'before', 'after', 'wins'];
+  const authority = ['data', 'study', 'research', 'case', 'report', 'statistic', 'evidence', 'analysis'];
+  const emotion = ['love', 'fear', 'surprise', 'amazing', 'urgent', 'risk', 'win', 'change', 'future'];
+  const humor = ['funny', 'meme', 'wild', 'weird', 'lol', 'joke'];
+  const scoreTerms = (terms) => terms.reduce((sum, term) => sum + (lower.includes(term) ? 1 : 0), 0);
+  const lengthFit = words.length < 45 ? 82 : words.length < 120 ? 92 : words.length < 220 ? 78 : 62;
+  const readability = clamp(96 - Math.max(0, words.length - 90) * 0.12 + scoreTerms(['simple', 'clear', 'easy']) * 4 + seed % 7);
+  return {
+    words: words.length,
+    hook: clamp(48 + scoreTerms(hooks) * 9 + (text.includes('?') ? 7 : 0) + (text.includes('!') ? 5 : 0) + seed % 11),
+    authority: clamp(42 + scoreTerms(authority) * 11 + seed % 9),
+    emotion: clamp(45 + scoreTerms(emotion) * 8 + (text.includes('!') ? 6 : 0) + seed % 10),
+    humor: clamp(35 + scoreTerms(humor) * 15 + seed % 12),
+    clarity: readability,
+    lengthFit,
+    curiosity: clamp(44 + scoreTerms(['secret', 'why', 'what if', 'future', 'before', 'hidden']) * 10 + (text.includes('?') ? 10 : 0) + seed % 13),
+  };
+}
+
+function createSimulation(sourceText, options = {}) {
+  const baseText = sourceText?.trim() || 'Paste or generate content first, then run the future simulator.';
+  const seed = options.seed || 1;
+  const focus = options.focus || 'Balanced';
+  const strategy = options.strategy || 'Short Hook + High Curiosity';
+  const signals = signalFromText(baseText, seed);
+  const focusBoost = {
+    students: { clarity: 8, emotion: 5 },
+    professionals: { authority: 12, clarity: 3 },
+    genz: { hook: 10, humor: 10, curiosity: 8 },
+    general: { clarity: 10, lengthFit: 5 },
+    debate: { hook: 5, authority: 5, clarity: 5 },
+    Balanced: {},
+  }[focus] || {};
+  const merged = Object.fromEntries(Object.entries(signals).map(([key, value]) => [key, clamp(value + (focusBoost[key] || 0))]));
+  const average = (...values) => clamp(values.reduce((sum, value) => sum + value, 0) / values.length);
+  const audiencePulse = {
+    students: average(merged.clarity, merged.emotion, merged.lengthFit),
+    professionals: average(merged.authority, merged.clarity, merged.lengthFit - 4),
+    genz: average(merged.hook, merged.humor, merged.curiosity),
+    general: average(merged.clarity, merged.emotion, merged.hook),
+  };
+  const futureScore = average(audiencePulse.students, audiencePulse.professionals, audiencePulse.genz, audiencePulse.general, merged.hook);
+  const reachBase = 42000 + futureScore * 1250 + merged.curiosity * 420 + seed * 930;
+  const engagement = clamp(50 + futureScore * 0.42 + merged.hook * 0.18);
+  const shares = Math.round(reachBase * (0.026 + merged.emotion / 5800 + merged.curiosity / 7200));
+  const saves = Math.round(reachBase * (0.036 + merged.authority / 6500 + merged.clarity / 7600));
+  const comments = Math.round(reachBase * (0.016 + merged.hook / 9000 + merged.emotion / 10000));
+  const followers = Math.round(reachBase * (0.004 + futureScore / 65000));
+  const universeBase = [
+    ['A', 'Professional Authority', 'Professionals', merged.authority + 5, 0.64],
+    ['B', 'Storytelling Driven', 'General', average(merged.emotion, merged.clarity) + 5, 0.82],
+    ['C', 'Short Hook + High Curiosity', 'Gen-Z', average(merged.hook, merged.curiosity, merged.humor) + 8, 1.16],
+    ['D', 'Emotional Narrative', 'Mixed', average(merged.emotion, merged.clarity, merged.hook) + 6, 1.02],
+  ];
+  const universes = universeBase.map(([id, name, fit, quality, multiplier]) => {
+    const predictedReach = Math.round(reachBase * multiplier + quality * 450);
+    return {
+      id,
+      name,
+      fit,
+      predictedReach,
+      reachLabel: compactNumber(predictedReach),
+      ctr: (2.4 + quality / 17).toFixed(1),
+      engagement: clamp(quality),
+      recommended: false,
+      preview: buildVariantText(baseText, name),
+    };
+  }).sort((a, b) => b.engagement - a.engagement).map((universe, index) => ({ ...universe, recommended: index === 0 }));
+  const audiences = [
+    {
+      id: 'students',
+      name: 'Student Twin',
+      pulse: audiencePulse.students,
+      reaction: audiencePulse.students > 82 ? 'Loved it.' : 'Understands it, but wants more examples.',
+      futureSentiment: audiencePulse.students > 80 ? 'Energized and likely to share with classmates.' : 'Curious, but motivation could be stronger.',
+      stats: [
+        ['Share Probability', `${clamp(audiencePulse.students + 4)}%`],
+        ['Motivation Score', `${clamp(audiencePulse.students + 7)}/100`],
+        ['Engagement Score', `${clamp(audiencePulse.students + 2)}/100`],
+      ],
+      likes: 'Easy to understand',
+      dislikes: merged.clarity < 75 ? 'Some terms still feel dense' : 'Wants one memorable example',
+      actions: ['Optimize For Students', 'Regenerate Analysis', 'Compare Version'],
+    },
+    {
+      id: 'professionals',
+      name: 'Professional Twin',
+      pulse: audiencePulse.professionals,
+      reaction: audiencePulse.professionals > 80 ? 'Credible and useful.' : 'Needs proof before acting.',
+      futureSentiment: audiencePulse.professionals > 80 ? 'Ready to bookmark and forward internally.' : 'Interested, but asks for stronger evidence.',
+      stats: [
+        ['Credibility Score', `${clamp(merged.authority + 10)}/100`],
+        ['Data Requirement', merged.authority > 72 ? 'Medium' : 'High'],
+        ['Practicality Score', `${clamp(audiencePulse.professionals + 3)}/100`],
+        ['Conversion Likelihood', `${clamp(audiencePulse.professionals - 5)}%`],
+      ],
+      likes: 'Practical angle',
+      dislikes: merged.authority < 74 ? 'Missing supporting statistics' : 'Could use a sharper CTA',
+      actions: ['Add Statistics', 'Add Examples', 'Optimize For Professionals'],
+    },
+    {
+      id: 'genz',
+      name: 'Gen-Z Twin',
+      pulse: audiencePulse.genz,
+      reaction: audiencePulse.genz > 82 ? 'Would stop scrolling.' : 'Hook needs more bite.',
+      futureSentiment: audiencePulse.genz > 82 ? 'High replay, comment, and remix potential.' : 'May skim unless the opener gets sharper.',
+      stats: [
+        ['Attention Score', `${clamp(merged.hook + 6)}/100`],
+        ['Humor Score', `${clamp(merged.humor + 5)}/100`],
+        ['Scroll-Stopping Score', `${clamp(average(merged.hook, merged.curiosity) + 8)}/100`],
+        ['Virality Potential', `${clamp(audiencePulse.genz + 6)}%`],
+        ['Meme Compatibility', `${clamp(merged.humor + 12)}%`],
+      ],
+      likes: 'Curiosity angle',
+      dislikes: merged.hook < 78 ? 'Hook is weak' : 'Could be punchier',
+      actions: ['Add Humor', 'Shorten Intro', 'Improve Hook'],
+    },
+    {
+      id: 'general',
+      name: 'General Twin',
+      pulse: audiencePulse.general,
+      reaction: audiencePulse.general > 82 ? 'Clear and recommendable.' : 'Gets the idea but wants fewer steps.',
+      futureSentiment: audiencePulse.general > 80 ? 'Likely to finish and recommend.' : 'Positive, but clarity is the unlock.',
+      stats: [
+        ['Simplicity Score', `${clamp(merged.clarity + 4)}/100`],
+        ['Interest Score', `${clamp(audiencePulse.general + 2)}/100`],
+        ['Clarity Score', `${clamp(merged.clarity)}/100`],
+        ['Recommendation Score', `${clamp(audiencePulse.general + 5)}/100`],
+      ],
+      likes: 'Clear direction',
+      dislikes: merged.clarity < 80 ? 'Reduce complexity' : 'Needs stronger ending',
+      actions: ['Simplify Content', 'Improve Readability'],
+    },
+  ];
+  const debate = [
+    ['Student Agent', audiences[0].reaction, 'students'],
+    ['Professional Agent', audiences[1].dislikes, 'professionals'],
+    ['Gen-Z Agent', audiences[2].dislikes, 'genz'],
+    ['General Audience', audiences[3].reaction, 'general'],
+    ['AI Creator', `Optimizing for ${focus === 'Balanced' ? 'all audiences' : focus}.`, 'creator'],
+    ['AI Strategist', `Predicted engagement moves to ${engagement}% after recalculation.`, 'strategist'],
+    ['AI Growth Agent', `Curiosity and urgency could lift CTR to ${(2.8 + merged.curiosity / 18).toFixed(1)}%.`, 'growth'],
+  ].map(([agent, message, tone], index) => ({ id: `${seed}-${index}-${tone}`, agent, message, tone }));
+  const recommendations = [
+    ['Add Statistic', 'Professionals', '+18%', '+9%', 'Add one proof point, benchmark, or result.'],
+    ['Simplify Terminology', 'Students', '+12%', '+11%', 'Replace dense wording with classroom-clear phrasing.'],
+    ['Improve Hook', 'Gen-Z', '+22%', '+14%', 'Open with tension, curiosity, or a sharp promise.'],
+    ['Reduce Complexity', 'General', '+10%', '+8%', 'Cut secondary details and make the next action obvious.'],
+    ['Add Stronger CTA', 'Professionals', '+9%', '+13%', 'Tell readers exactly what to do after reading.'],
+  ].map(([title, audience, reachLift, engagementLift, detail], index) => ({
+    id: `${title.toLowerCase().replace(/\s+/g, '-')}-${seed}`,
+    title,
+    audience,
+    reachLift,
+    engagementLift,
+    impact: clamp(70 + index * 4 + futureScore / 6),
+    detail,
+    applied: false,
+  }));
+  const rewrites = [
+    ['A', 'Professional', buildVariantText(baseText, 'Professional Authority'), clamp(audiencePulse.professionals + 4)],
+    ['B', 'Storytelling', buildVariantText(baseText, 'Storytelling Driven'), clamp(audiencePulse.general + 5)],
+    ['C', 'Viral', buildVariantText(baseText, 'Short Hook + High Curiosity'), clamp(audiencePulse.genz + 7)],
+    ['D', 'Thought Leadership', buildVariantText(baseText, 'Emotional Narrative'), clamp(futureScore + 5)],
+  ].map(([id, name, text, score]) => ({ id, name, text, score }));
+  return {
+    runId: seed,
+    focus,
+    strategy,
+    activeUniverseId: universes[0]?.id || 'C',
+    activeRewriteId: 'C',
+    activeContent: baseText,
+    futureScore,
+    audienceMatch: futureScore > 84 ? 'High' : futureScore > 72 ? 'Medium-high' : 'Needs work',
+    publishingConfidence: clamp(futureScore + 7),
+    recommendation: futureScore > 82 ? 'Publish Now' : 'Improve Before Publishing',
+    metrics: {
+      reach: compactNumber(Math.round(reachBase)),
+      reachRaw: Math.round(reachBase),
+      engagement,
+      saves: compactNumber(saves),
+      shares: compactNumber(shares),
+      comments: compactNumber(comments),
+      followers: `+${compactNumber(followers)}`,
+    },
+    timeline: [
+      ['24 Hours', Math.round(reachBase * 0.16)],
+      ['7 Days', Math.round(reachBase * 0.52)],
+      ['30 Days', Math.round(reachBase)],
+      ['90 Days', Math.round(reachBase * 1.38)],
+    ].map(([label, reach]) => ({ label, reach, reachLabel: compactNumber(reach) })),
+    virality: {
+      hook: merged.hook,
+      emotional: merged.emotion,
+      curiosity: merged.curiosity,
+      authority: merged.authority,
+      shareability: clamp(average(merged.emotion, merged.curiosity, futureScore)),
+      viral: clamp(average(merged.hook, merged.emotion, merged.curiosity, merged.humor)),
+    },
+    audiences,
+    universes,
+    debate,
+    recommendations,
+    rewrites,
+    lastAction: 'Future simulation initialized',
+  };
+}
+
+function buildVariantText(text, strategy) {
+  const clean = text.trim();
+  const first = clean.split(/\n+/)[0]?.slice(0, 220) || clean.slice(0, 220);
+  const variants = {
+    'Professional Authority': `Data-backed angle: ${first}\n\nAdd one concrete benchmark, a practical takeaway, and a direct next step for decision-makers.`,
+    'Storytelling Driven': `Imagine the moment this becomes obvious: ${first}\n\nTurn the idea into a human story, then close with the lesson readers can use today.`,
+    'Short Hook + High Curiosity': `Most people miss this until it is too late: ${first}\n\nHere is the simple shift that makes the content worth sharing.`,
+    'Emotional Narrative': `The real reason this matters is not just information. It is momentum.\n\n${first}\n\nMake the reader feel the cost of waiting and the upside of acting now.`,
+  };
+  return variants[strategy] || clean;
+}
+
+function applyOptimizationText(text, action) {
+  const openers = {
+    students: 'Simple version: here is the idea in plain language, with one example you can use immediately.',
+    professionals: 'Evidence-led version: the core claim is supported by a practical benchmark and a clearer business outcome.',
+    genz: 'Stop scrolling: this is the tiny shift that changes the whole result.',
+    general: 'Clearer version: this trims the complexity and makes the main point easier to act on.',
+    debate: 'Consensus version: stronger hook, clearer proof, simpler takeaway, and a sharper next action.',
+  };
+  return `${openers[action] || 'Optimized version:'}\n\n${text.trim()}`;
+}
+
 // ─── STORE ────────────────────────────────────────────────────────────────────
 export const useStore = create((set, get) => ({
   content: '',
@@ -203,6 +440,149 @@ export const useStore = create((set, get) => ({
 
   isMock: IS_MOCK,
   modelName: MODEL,
+
+  simulation: null,
+  simulationSeed: 1,
+  startSimulation: (source = null) => {
+    const { content, activeAsset, simulationSeed } = get();
+    const sourceText = source || activeAsset?.text || content;
+    const next = createSimulation(sourceText, { seed: simulationSeed + 1 });
+    set({ simulation: next, simulationSeed: simulationSeed + 1, view: 'simulator' });
+  },
+  recalculateSimulation: (focus = 'Balanced', strategy = null) => {
+    const { simulation, content, simulationSeed } = get();
+    const sourceText = simulation?.activeContent || content;
+    const nextSeed = simulationSeed + 1;
+    const next = createSimulation(sourceText, {
+      seed: nextSeed,
+      focus,
+      strategy: strategy || simulation?.strategy || 'Short Hook + High Curiosity',
+    });
+    set({ simulation: { ...next, lastAction: `Recalculated for ${focus}` }, simulationSeed: nextSeed });
+  },
+  optimizeSimulation: (action = 'debate') => {
+    const { simulation, content, simulationSeed, showToast } = get();
+    const current = simulation?.activeContent || content;
+    const focusMap = {
+      'Optimize For Students': 'students',
+      'Regenerate Analysis': 'students',
+      'Compare Version': 'students',
+      'Add Statistics': 'professionals',
+      'Add Examples': 'professionals',
+      'Optimize For Professionals': 'professionals',
+      'Add Humor': 'genz',
+      'Shorten Intro': 'genz',
+      'Improve Hook': 'genz',
+      'Simplify Content': 'general',
+      'Improve Readability': 'general',
+      'Optimize Based On Debate': 'debate',
+      'Resolve Conflict': 'debate',
+      'Generate Counter Arguments': 'debate',
+      'Continue Debate': 'debate',
+    };
+    const focus = focusMap[action] || action || 'debate';
+    const optimized = applyOptimizationText(current, focus);
+    const nextSeed = simulationSeed + 1;
+    const next = createSimulation(optimized, {
+      seed: nextSeed,
+      focus,
+      strategy: simulation?.strategy || 'Short Hook + High Curiosity',
+    });
+    set({
+      content: optimized,
+      simulation: { ...next, lastAction: action },
+      simulationSeed: nextSeed,
+    });
+    showToast(`Future recalculated: ${action}`, 'success');
+  },
+  selectUniverse: (universeId) => set((s) => {
+    if (!s.simulation) return {};
+    const selected = s.simulation.universes.find(u => u.id === universeId);
+    return {
+      simulation: {
+        ...s.simulation,
+        activeUniverseId: universeId,
+        activeContent: selected?.preview || s.simulation.activeContent,
+        lastAction: selected ? `${selected.name} universe selected` : 'Universe selected',
+      },
+    };
+  }),
+  runUniverseAction: (universeId, action) => {
+    const { simulation, simulationSeed, showToast } = get();
+    if (!simulation) return;
+    const selected = simulation.universes.find(u => u.id === universeId) || simulation.universes[0];
+    if (!selected) return;
+    if (action === 'Set As Final Version' || action === 'Preview Content' || action === 'Compare Against Current') {
+      set({
+        content: selected.preview,
+        simulation: {
+          ...createSimulation(selected.preview, { seed: simulationSeed + 1, strategy: selected.name, focus: selected.fit.toLowerCase().replace('-', '') }),
+          activeUniverseId: selected.id,
+          lastAction: action,
+        },
+        simulationSeed: simulationSeed + 1,
+      });
+    } else if (action === 'Duplicate Universe') {
+      const clone = {
+        ...selected,
+        id: `${selected.id}${simulation.universes.length + 1}`,
+        name: `${selected.name} Variant`,
+        predictedReach: Math.round(selected.predictedReach * 1.06),
+        reachLabel: compactNumber(Math.round(selected.predictedReach * 1.06)),
+        engagement: clamp(selected.engagement + 3),
+        recommended: false,
+      };
+      set({ simulation: { ...simulation, universes: [clone, ...simulation.universes], activeUniverseId: clone.id, lastAction: action } });
+    } else {
+      get().recalculateSimulation(selected.fit.toLowerCase(), selected.name);
+    }
+    showToast(action, 'success');
+  },
+  applyRecommendation: (recommendationId) => {
+    const { simulation } = get();
+    if (!simulation) return;
+    const rec = simulation.recommendations.find(r => r.id === recommendationId);
+    if (!rec) return;
+    get().optimizeSimulation(rec.title);
+    set((s) => ({
+      simulation: s.simulation ? {
+        ...s.simulation,
+        recommendations: s.simulation.recommendations.map(r => r.id === recommendationId ? { ...r, applied: true } : r),
+        lastAction: `${rec.title} applied`,
+      } : s.simulation,
+    }));
+  },
+  undoRecommendation: () => {
+    const { content, simulationSeed, showToast } = get();
+    const lines = content.split('\n\n');
+    const restored = lines.length > 1 ? lines.slice(1).join('\n\n') : content;
+    const nextSeed = simulationSeed + 1;
+    set({
+      content: restored,
+      simulation: { ...createSimulation(restored, { seed: nextSeed }), lastAction: 'Optimization undone' },
+      simulationSeed: nextSeed,
+    });
+    showToast('Optimization undone', 'info');
+  },
+  setRewriteActive: (rewriteId) => {
+    const { simulation, simulationSeed, showToast } = get();
+    if (!simulation) return;
+    const rewrite = simulation.rewrites.find(r => r.id === rewriteId);
+    if (!rewrite) return;
+    const nextSeed = simulationSeed + 1;
+    const next = createSimulation(rewrite.text, { seed: nextSeed, strategy: rewrite.name });
+    set({
+      content: rewrite.text,
+      simulation: { ...next, activeRewriteId: rewriteId, lastAction: `${rewrite.name} rewrite activated` },
+      simulationSeed: nextSeed,
+    });
+    showToast(`${rewrite.name} version is active`, 'success');
+  },
+  publishSimulationWinner: () => {
+    const { simulation, showToast } = get();
+    if (!simulation) return;
+    showToast(`Publishing confidence ${simulation.publishingConfidence}% - ${simulation.recommendation}`, 'success');
+  },
 
   assetMetrics: () => {
     const assets = get().assets;

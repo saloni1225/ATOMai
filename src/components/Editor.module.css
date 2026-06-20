@@ -33,6 +33,22 @@
 .atomizeBtn:hover:not(:disabled) { background: linear-gradient(135deg, rgba(99,102,241,0.35), rgba(99,102,241,0.2)); border-color: var(--accent); color: #C7D2FE; box-shadow: 0 0 20px rgba(99,102,241,0.2); }
 .atomizeBtn:disabled { opacity: 0.4; cursor: not-allowed; }
 
+.futureBtn {
+  display: flex; align-items: center; gap: 6px; position: relative;
+  padding: 6px 14px; border-radius: var(--radius-md);
+  border: 1px solid rgba(34,211,238,0.45);
+  background: linear-gradient(135deg, rgba(34,211,238,0.18), rgba(139,92,246,0.12));
+  color: #67E8F9; font-size: 12px; font-weight: 700;
+  transition: all 0.15s;
+}
+.futureBtn:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(34,211,238,0.28), rgba(139,92,246,0.22));
+  border-color: rgba(34,211,238,0.75);
+  color: #ECFEFF;
+  box-shadow: 0 0 22px rgba(34,211,238,0.2);
+}
+.futureBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
 .atomizePulse {
   position: absolute; top: -3px; right: -3px;
   width: 8px; height: 8px; border-radius: 50%;

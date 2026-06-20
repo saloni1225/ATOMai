@@ -2,6 +2,7 @@ import Topbar from './components/Topbar';
 import Editor from './components/Editor';
 import Results from './components/Results';
 import AssetEditor from './components/AssetEditor';
+import FutureSimulator from './components/FutureSimulator';
 import LoadingOverlay from './components/LoadingOverlay';
 import Toast from './components/Toast';
 import { useStore } from './store/useStore';
@@ -17,6 +18,7 @@ export default function App() {
         {view === 'editor'  && <Editor />}
         {view === 'results' && <Results />}
         {view === 'asset'   && <AssetEditor />}
+        {view === 'simulator' && <FutureSimulator />}
       </div>
       <LoadingOverlay />
       <Toast />
